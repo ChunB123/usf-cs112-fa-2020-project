@@ -1,36 +1,60 @@
 package MLLibrary;
 
+
 import javax.swing.*;
 import java.awt.*;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 public class Driver {
 
-    /*
-    1. Generate two sets of random DataPoints, one being the training data set, one being the test data set.
-    2. Instantiate a DummyModel class, train and test with your random data and computethe precision and accuracy.
-    3. Display the precision and accuracy in a JFrame. Be creative here with your labels and format for printing them.
-    We will use this JFrame again and again for next set of milestones.*/
+    private static List<String> getRecordFromLine(String line) {
+        List<String> values = new ArrayList<String>();
+        try (Scanner rowScanner = new Scanner(line)) {
+            rowScanner.useDelimiter(",");
+            while (rowScanner.hasNext()) {
+                values.add(rowScanner.next());
+            }
+        }
+        return values;
+    }
 
     public static void main(String[] args){
-        Random rd = new Random();
-        ArrayList<DataPoint> trainingSet=new ArrayList<>();
-        trainingSet.add(new DataPoint(0.0001,0.0002,"red",""));
-        trainingSet.add(new DataPoint(0.5,0.51,"blue",""));
-        trainingSet.add(new DataPoint(0.0001,0.00004,"red",""));
+        ArrayList<DataPoint> dataPoints=new ArrayList<>();
+        try {
+            Scanner scanner = new Scanner(new File("titanic.csv"));
+            while(scanner.hasNextLine()){
+                List<String> records=getRecordFromLine(scanner.nextLine());
+                // TODO: Select the columns from the records and create a DataPoint object
+                // TODO: Store the DataPoint object in a collection
+                if(!records.get(1).equals("survived")) {
 
-        ArrayList<DataPoint> testingSet=new ArrayList<>();
-        testingSet.add(new DataPoint(rd.nextDouble(),rd.nextDouble(),"",""));
-        testingSet.add(new DataPoint(rd.nextDouble(),rd.nextDouble(),"",""));
-        testingSet.add(new DataPoint(rd.nextDouble(),rd.nextDouble(),"",""));
+                    Random random = new Random();
+                    double randNum = random.nextDouble();
+                    //90% data is reserved for training
+                    if(records.size()==7){
+                        if(!records.get(5).equals("")) {
+                            if (randNum < 0.9) {
+                                dataPoints.add(new DataPoint(Double.valueOf(records.get(5)), Double.valueOf(records.get(6)), records.get(1), "train"));
+                            } else {
+                                dataPoints.add(new DataPoint(Double.valueOf(records.get(5)), Double.valueOf(records.get(6)), records.get(1), "test"));
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        KNNModel knnModel=new KNNModel(0);
+        knnModel.train(dataPoints);
 
-        Model dummyModel=new DummyModel();
-        dummyModel.train(trainingSet);
-        System.out.println(dummyModel.test(testingSet));
-
-        double precision=dummyModel.getPrecision(testingSet);
-        double accuracy=dummyModel.getAccuracy(testingSet);
+        Double precision=knnModel.getPrecision(dataPoints);
+        Double accuracy=knnModel.getAccuracy(dataPoints);
 
         //display
         SwingUtilities.invokeLater(
@@ -47,4 +71,7 @@ public class Driver {
         myFrame.pack();
         myFrame.setVisible(true);
     }
+
+
+
 }
