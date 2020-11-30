@@ -24,7 +24,9 @@ public class Driver {
     }
 
     public static void main(String[] args){
-        ArrayList<DataPoint> dataPoints=new ArrayList<>();
+        ArrayList<DataPoint> trainSet=new ArrayList<>();
+        ArrayList<DataPoint> testSet=new ArrayList<>();
+
         try {
             Scanner scanner = new Scanner(new File("titanic.csv"));
             while(scanner.hasNextLine()){
@@ -38,10 +40,11 @@ public class Driver {
                     //90% data is reserved for training
                     if(records.size()==7){
                         if(!records.get(5).equals("")) {
+
                             if (randNum < 0.9) {
-                                dataPoints.add(new DataPoint(Double.valueOf(records.get(5)), Double.valueOf(records.get(6)), records.get(1), "train"));
+                                trainSet.add(new DataPoint(Double.valueOf(records.get(5)), Double.valueOf(records.get(6)), records.get(1), "train"));
                             } else {
-                                dataPoints.add(new DataPoint(Double.valueOf(records.get(5)), Double.valueOf(records.get(6)), records.get(1), "test"));
+                                testSet.add(new DataPoint(Double.valueOf(records.get(5)), Double.valueOf(records.get(6)), records.get(1), "test"));
                             }
                         }
                     }
@@ -50,11 +53,11 @@ public class Driver {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        KNNModel knnModel=new KNNModel(0);
-        knnModel.train(dataPoints);
+        KNNModel knnModel=new KNNModel(3);
+        knnModel.train(trainSet);
 
-        Double precision=knnModel.getPrecision(dataPoints);
-        Double accuracy=knnModel.getAccuracy(dataPoints);
+        Double precision=knnModel.getPrecision(testSet);
+        Double accuracy=knnModel.getAccuracy(testSet);
 
         //display
         SwingUtilities.invokeLater(
