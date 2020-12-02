@@ -17,6 +17,8 @@ public class KNNModel extends Model {
 
     private double getDistance(DataPoint p1, DataPoint p2) {
         return Math.sqrt(Math.pow((p1.getF1() - p2.getF1()), 2) + Math.pow((p1.getF2() - p2.getF2()), 2));
+        //return Math.pow((p1.getF1() - p2.getF1()), 2) + Math.pow((p1.getF2() - p2.getF2()), 2);
+
     }
 
 
@@ -66,6 +68,7 @@ public class KNNModel extends Model {
                 if (array[i][1] == 1) {
                     labelOne++;
                 }
+                //System.out.println(array[i][0]);
             }
             if (labelZero > labelOne) {
                 return "0";

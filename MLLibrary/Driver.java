@@ -53,7 +53,7 @@ public class Driver {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        KNNModel knnModel=new KNNModel(3);
+        KNNModel knnModel=new KNNModel(49);
         knnModel.train(trainSet);
 
         Double precision=knnModel.getPrecision(testSet);
