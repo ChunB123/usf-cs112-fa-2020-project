@@ -1,6 +1,8 @@
 package MLLibrary;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -12,31 +14,31 @@ import javax.swing.*;
 public class Graph extends JPanel {
 
     private static final long serialVersionUID = 1L;
-    private int labelPadding = 40;
-    private Color lineColor = new Color(255, 255, 254);
+    private final int labelPadding = 40;
+    private final Color lineColor = new Color(255, 255, 254);
 
-    private Color gridColor = new Color(200, 200, 200, 200);
+    private final Color gridColor = new Color(200, 200, 200, 200);
 
-    private Color pointColor = new Color(255, 0, 255);
+    private final Color pointColor = new Color(255, 0, 255);
 
     // TODO: Add point colors for each type of data point
-    private Color blueColor = new Color(0, 0, 255);
+    private final Color blueColor = new Color(0, 0, 255);
 
-    private Color cyanColor = new Color(0, 255, 255);
+    private final Color cyanColor = new Color(0, 255, 255);
 
-    private Color yellowColor = new Color(255, 255, 0);
+    private final Color yellowColor = new Color(255, 255, 0);
 
-    private Color redColor = new Color(255, 0, 0);
+    private final Color redColor = new Color(255, 0, 0);
 
     private static final Stroke GRAPH_STROKE = new BasicStroke(2f);
 
     // TODO: Change point width as needed
-    private static int pointWidth = 10;
+    private static final int pointWidth = 10;
 
     // Number of grids and the padding width
-    private int numXGridLines = 6;
-    private int numYGridLines = 6;
-    private int padding = 40;
+    private final int numXGridLines = 6;
+    private final int numYGridLines = 6;
+    private final int padding = 40;
 
     private List<DataPoint> data;
 
@@ -49,7 +51,7 @@ public class Graph extends JPanel {
     public Graph(List<DataPoint> testData, List<DataPoint> trainData) {
         this.data = testData;
         // TODO: instantiate a KNNModel variable
-        knnModel=new KNNModel(15);
+        knnModel=new KNNModel(5);
         // TODO: Run train with the trainData
         knnModel.train((ArrayList<DataPoint>) trainData);
     }
@@ -220,19 +222,63 @@ public class Graph extends JPanel {
         Graph mainPanel = new Graph(testData, trainData);
 
         // Feel free to change the size of the panel
-        mainPanel.setPreferredSize(new Dimension(700, 600));
+        mainPanel.setPreferredSize(new Dimension(400, 400));
 
         /* creating the frame */
         JFrame frame = new JFrame("CS 112 Lab Part 3");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.getContentPane().add(mainPanel);
+        frame.setLayout(new GridBagLayout());
+
+        JPanel p=new JPanel();
+        frame.getContentPane().add(p);
+
+        p.setPreferredSize(new Dimension(400,800));
+        p.add(mainPanel);
 
         Container contentPane = frame.getContentPane();
         contentPane.setLayout(new GridLayout(1,2));
         Double precision=knnModel.getPrecision((ArrayList<DataPoint>) testData);
         Double accuracy=knnModel.getAccuracy((ArrayList<DataPoint>) testData);
-        contentPane.add(new JButton("Precision:"+Double.toString(precision)));
-        contentPane.add(new JButton("Accuracy:"+Double.toString(accuracy)));
+        JButton precisionButton=new JButton("Precision:"+ precision);
+        contentPane.add(precisionButton);
+        JButton accuracyButton=new JButton("Accuracy:"+ accuracy);
+        contentPane.add(accuracyButton);
+
+        //add a label
+        JLabel sliderLabel = new JLabel("Choose the majority value", JLabel.CENTER);
+        sliderLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        sliderLabel.setPreferredSize(new Dimension(400,100));
+        p.add(sliderLabel);
+
+        //add a slider
+        JSlider slider = new JSlider(JSlider.HORIZONTAL, 2, 25, 5);
+        slider.setMajorTickSpacing(5);
+        slider.setMinorTickSpacing(1);
+        slider.setPaintTicks(true);
+        slider.setPaintLabels(true);
+        slider.setSnapToTicks(true);
+        slider.setBorder(
+                BorderFactory.createEmptyBorder(0,0,10,0));
+        //Add content to the window.
+        p.add(slider);
+        JButton runTest=new JButton("Run Test");
+        runTest.setPreferredSize(new Dimension(400,100));
+        runTest.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int K=slider.getValue()*2+1;
+                knnModel=new KNNModel(K);
+                knnModel.train((ArrayList<DataPoint>) trainData);
+
+                Double precisionFromButton=knnModel.getPrecision((ArrayList<DataPoint>) testData);
+                Double accuracyFromButton=knnModel.getAccuracy((ArrayList<DataPoint>) testData);
+                precisionButton.setText("Precision:"+precisionFromButton);
+                accuracyButton.setText("Accuracy:"+ accuracyFromButton);
+            }
+        });
+        p.add(runTest);
+
+
 
         frame.pack();
         frame.setLocationRelativeTo(null);
